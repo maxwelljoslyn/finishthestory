@@ -1,0 +1,8 @@
+$def with (game, players)
+
+<h2>Who's In Game ${game}?</h2>
+
+<ol>
+$for p in players:
+    <li>$p['name']</li>
+</ol>

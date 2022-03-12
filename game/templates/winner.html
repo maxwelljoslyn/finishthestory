@@ -1,0 +1,31 @@
+$def with (r, votes, possiblewinners, winnerpid, pid_to_name)
+
+$ winner = pid_to_name[winnerpid]
+$ game = tx.user.session['game']
+
+<ul>
+$for pidd, num in votes.items():
+    <li>$:pid_to_name[pidd] got $:num votes.</li>
+</ul>
+
+$if len(possiblewinners) == 1:
+    <p>$:winner was the winner! Their writing will be added to the story.</p>
+$else:
+    $ w = ", ".join(possiblewinners)
+    <p>These people tied: ${w}.</p>
+    <p>The computer chose randomly, and $winner was the winner! Their writing will be added to the story.</p>
+
+<script defer>
+  function nextRound() {
+    fetch('/games/$game/rounds/$r/advance', {
+      method: 'POST',
+    }).then(response => response.json())
+      .then(data => {
+        console.log(data.next)
+        window.location.assign(data.next)
+    }).catch((error) => {
+        console.error('nextRound errored:', error)
+    })
+  }
+  setInterval(nextRound, 10000)
+</script>

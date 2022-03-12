@@ -1,0 +1,14 @@
+$def with (games, players)
+
+<h2>Games</h2>
+
+$ foo = tx.user.session.get('game')
+$if foo:
+    <p>You are in game $foo</p>
+
+$:render_games(games, players)
+
+$if foo:
+    $:render_started_waiter(foo)
+
+<form method=post action=/games/create><button>Create New Game</button></form>

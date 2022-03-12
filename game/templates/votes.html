@@ -1,0 +1,23 @@
+$def with (r, rname, otherentries, yours)
+
+$ game = tx.user.session['game']
+$ yourpid = tx.user.session['pid']
+
+<h2>Round $:{r}: $:{titlecase(rname)}</h2>
+
+<p>Vote for the person who you think wrote the best entry this round. It's OK to vote for yourself. If there is a tie, the winner will be determined at random.</p>
+
+<form method=post action="/games/$game/rounds/$r/votes">
+$for each in otherentries:
+    $ opid = each['id']
+    $ oname = each['name']
+    $ oentry = each['writing']
+    <p>$:oname wrote:</p> <div>$:oentry</div>
+    <label>Vote for $:{oname}'s writing<input type=radio name=voted_for value=$:opid></input></label>
+    <br>
+<p>You wrote:</p> <div>$:yours</div>
+<label>Vote for yourself<input type=radio name=voted_for value=$:yourpid></input></label>
+
+<button type=submit>Cast Vote</button>
+
+</form>

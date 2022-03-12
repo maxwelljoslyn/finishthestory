@@ -1,0 +1,88 @@
+$def with (r, rname, rprompt, landscape, challenge, other_entries)
+
+$ r = titlecase(r)
+$ pid = tx.user.session['pid']
+$ game = tx.user.session['game']
+$if not tx.user.session.get('character'):
+    $ q = get_character(game, pid)
+    $ tx.user.session["character"] = q
+$ character = tx.user.session["character"]
+
+<h2>Round $:{r}: $:{titlecase(rname)}</h2>
+
+<em>$:rprompt</em>
+
+<p>Your character: $:character</p>
+
+<p>Landscape: $:landscape</p>
+
+$if str(r) != '1':
+    <p>Challenge: $:challenge</p>
+
+$if str(r) != '1':
+    <p>Continue your writing from last round's winner:</p>
+    <div>$:get_winning_entry(game, r)</div>
+
+$ pid = tx.user.session['pid']
+$ game = tx.user.session['game']
+
+$:render_other_entries(game, r, pid, [])
+
+<form id=writingform method=post action=/games/$game/rounds/$r/entries/$pid>
+  <textarea id=writing name=writing rows='5' cols='80'></textarea>
+</form>
+
+<div id=timer></div>
+
+<script defer>
+  let timer = document.getElementById('timer')
+  let writing = document.getElementById('writing')
+
+  function visitVoting() {
+    window.location.assign("/games/$game/rounds/$r/votes")
+  }
+
+  function pollTimer() {
+    fetch('/games/$game/rounds/$r/timer', {
+      }).then(response => response.json())
+        .then(data => {
+          console.log('pollTimer succeeded:', data)
+          secondsLeft = data.seconds
+          if (secondsLeft <= 0) {
+            timer.innerText = "TIME'S UP!"
+            writing.disabled = true
+            setTimeout(visitVoting, 3000)
+          } else {
+            timer.innerText = String(secondsLeft)
+          }
+      }).catch((error) => {
+          console.error('pollTimer errored:', error)
+    })
+  }
+
+  function getWriting() {
+    var t = writing.value
+    console.log(t)
+    return t
+  }
+
+  function sendWriting() {
+    var text = getWriting()
+    fetch('/games/$game/rounds/$r/entries/$pid', {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+    },
+      body: JSON.stringify({'writing': text}),
+    }).then(response => response.json())
+      .then(data => {
+        console.log('sendWriting succeeded')
+    }).catch((error) => {
+        console.error('sendWriting errored:', error)
+    })
+  }
+
+
+  setInterval(sendWriting, 1000)
+  setInterval(pollTimer, 500)
+</script>

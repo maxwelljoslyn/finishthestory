@@ -1,0 +1,20 @@
+$def with (game, r)
+
+<p>Waiting for everyone to vote on Round $:{r}...</p>
+
+<script defer>
+  function goToWinner() {
+    fetch('/games/$game/rounds/$r/did-everyone-vote', {
+    }).then(response => response.json())
+      .then(data => {
+        if (data.ready === true) {
+          console.log(data)
+          //window.location.assign('https://www.maxwelljoslyn.com')
+          window.location.assign('/games/$game/rounds/$r/winner')
+        }
+    }).catch((error) => {
+        console.error('goToWinner errored:', error)
+    })
+  }
+  setInterval(goToWinner, 1000)
+</script>

@@ -1,0 +1,32 @@
+$def with ()
+
+<h1>
+  Finish the Story
+</h1>
+
+<p>
+"Finish the Story" is a writing game that anyone can play. This collaborative, online learning experience will help you <em>practice the craft of creative writing</em>.
+</p>
+
+<p>
+Grab two <span id=person>people</span> and build your story - together!
+</p>
+
+<form method=post action=/players/create>
+<label>Your Name<input required=required type=text name=name></input></label>
+<button>Join Game</button>
+</form>
+
+<script defer>
+
+  const personArray = ["friends", "family members", "acquaintances", "strangers", "buddies", "people"]
+  var personIndex = 0
+
+  function updatePerson() {
+  let s = document.getElementById('person')
+  s.innerText = personArray[personIndex]
+  personIndex = (personIndex + 1) % personArray.length
+}
+
+  setInterval(updatePerson, 2000)
+</script>

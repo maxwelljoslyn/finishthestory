@@ -1,0 +1,18 @@
+$def with (inner)
+<!DOCTYPE html>
+<html>
+<head>
+<link rel=stylesheet href=/static/style.css>
+<link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+<link rel="manifest" href="/static/site.webmanifest">
+</head>
+<body>
+<a href="/">Home</a>
+$:inner
+</body>
+Session is<br>$:tx.user.session
+<script src="/static/leader-line.min.js"></script>
+<script src="https://unpkg.com/htmx.org@1.7.0" integrity="sha384-EzBXYPt0/T6gxNp0nuPtLkmRpmDBbjg6WmCUZRLXBBwYYmwAUxzlSGej0ARHX0Bo" crossorigin="anonymous"></script>
+</html>
