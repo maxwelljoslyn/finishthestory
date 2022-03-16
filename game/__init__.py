@@ -682,3 +682,14 @@ class WaiterGameList:
         games = tx.db.select("games", what="rowid, *", where="progress = 'waiting'")
         players = tx.db.select("players", what="rowid, *", where="gameid is not null")
         return render_games(games, players)
+
+
+@app.control("favicon.ico")
+class Favicon:
+    def get(self):
+        # TODO this might not work; have to check how to do this in US framework, or better yet, add favicon support to US.
+        # not crucial. last minute change to suppress irritating notfound errors in terminal on each request for favicon
+        p = app.static_path / "favicon.ico"
+        with p.open("rb") as fp:
+            content = fp.read()
+        return content
