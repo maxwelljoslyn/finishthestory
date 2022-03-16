@@ -21,7 +21,7 @@ from .templates import (
 from . import util
 from .util import *
 
-ROUND_TIME_LIMIT = 15  # seconds
+ROUND_TIME_LIMIT = 180  # seconds
 
 
 app = web.application(
