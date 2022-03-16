@@ -12,30 +12,7 @@ __all__ = [
     "render_other_entries",
     "get_character",
     "titlecase",
-    "get_winning_entry",
-    "get_winner",
 ]
-
-
-def get_winner(game, r):
-    w = tx.db.select(
-        "rounds", what="winner", where="gameid = ? and nth = ?", vals=[game, r]
-    )
-    return w[0]["winner"] if w else None
-
-
-def get_winning_entry(game, r):
-    w = get_winner(game, r)
-    if not w:
-        raise ValueError(f"no winner for game {game}, round {r} yet")
-    else:
-        query = tx.db.select(
-            "rounds as r",
-            what="r.gameid, e.round, e.player, e.writing",
-            join="entries as e on r.winner=e.player and e.round=r.nth and e.gameid=r.gameid",
-            where=f"r.gameid={game} and e.round={r}",
-        )
-        return query
 
 
 def get_character(game, pid):

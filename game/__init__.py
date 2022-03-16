@@ -15,9 +15,9 @@ from .templates import (
     render_entry,
     render_other_entries,
     get_character,
-    get_winner,
-    get_winning_entry,
 )
+
+
 from . import util
 from .util import *
 
@@ -251,6 +251,15 @@ def get_players(game=None):
     return players
 
 
+def who_has_voted(game, r):
+    query = tx.db.select(
+        "votes as v",
+        what="v.gameid as gameid, v.round as round, v.player as player",
+        where=f"v.gameid={game} and v.round={r}",
+    )
+    return [q["player"] for q in query]
+
+
 def get_votes(game, r):
     query = tx.db.select(
         "votes as v",
@@ -267,6 +276,28 @@ def get_votes(game, r):
     return result, {q["pid"]: q["name"] for q in query}
 
 
+def get_winner(game, r):
+    q = tx.db.select(
+        "rounds", what="winner", where="gameid = ? and nth = ?", vals=[game, r]
+    )
+    return q[0]["winner"]
+
+
+def get_winning_entry(game, r):
+    w = get_winner(game, r)
+    if not w:
+        raise ValueError(f"no winner for game {game}, round {r} yet")
+    else:
+        query = tx.db.select(
+            "rounds as r",
+            what="r.gameid, e.round, e.player, e.writing",
+            join="entries as e on r.winner=e.player and r.nth=e.round and r.gameid=e.gameid",
+            where="r.gameid = ? and e.round= ?",
+            vals=[game, r],
+        )
+        return query[0]["writing"]
+
+
 def get_possible_winners(votes):
     highest = max(votes.values())
     pw = []
@@ -277,14 +308,14 @@ def get_possible_winners(votes):
 
 
 def assign_winner(game, r):
-    votes, pid_to_name = get_votes(game, r)
+    votes, _ = get_votes(game, r)
     pw = get_possible_winners(votes)
     if len(pw) == 1:
         w = pw[0]
     else:
         w = choice(pw)
     tx.db.update("rounds", winner=w, where="gameid = ? and nth = ?", vals=[game, r])
-    return votes, pw, w, pid_to_name
+    return
 
 
 def make_empty_entries(game, next_round):
@@ -569,23 +600,25 @@ class Timer:
 
 @app.control("games/{game}/rounds/{r}/winner")
 class RoundWinner:
-    def get(self, game, r):
+    def post(self, game, r):
         w = get_winner(game, r)
         if w:
-            votes, pid_to_name = get_votes(game, r)
-            pw = get_possible_winners(votes)
-            return app.view.winner(r, votes, pw, w, pid_to_name)
+            raise web.SeeOther(f"/games/{game}/rounds/{r}/winner")
         else:
-            votes, pw, winnerpid, pid_to_name = assign_winner(game, r)
-            return app.view.winner(r, votes, pw, winnerpid, pid_to_name)
+            assign_winner(game, r)
+            raise web.SeeOther(f"/games/{game}/rounds/{r}/winner")
+
+    def get(self, game, r):
+        w = get_winner(game, r)
+        votes, pid_to_name = get_votes(game, r)
+        pw = get_possible_winners(votes)
+        return app.view.winner(game, r, votes, pw, w, pid_to_name)
 
 
 @app.control("/games/{game}/rounds/{r}/did-everyone-vote")
 class DidEveryoneVote:
     def get(self, game, r):
-        votes, _ = get_votes(game, r)
-        players = get_players(game)
-        if sum(votes.values()) == len(players):
+        if get_winner(game, r):
             return {"ready": True}
         else:
             return {"ready": False}
@@ -594,17 +627,28 @@ class DidEveryoneVote:
 @app.control("/games/{game}/rounds/{r}/waitforvotes")
 class WaitForVotes:
     def get(self, game, r):
-        return app.view.waitforvotes(game, r)
+        votes, _ = get_votes(game, r)
+        players = get_players(game)
+        if sum(votes.values()) == len(players):
+            return app.view.waitforvotes(game, r, True)
+        else:
+            return app.view.waitforvotes(game, r, False)
 
 
 @app.control("games/{game}/rounds/{r}/votes")
 class Votes:
     def post(self, game, r):
-        # TODO check voter hasn't already voted -- unlikely to matter given game is funneling players toward correct pages, but would be needed for ideal app
         voter = tx.user.session["pid"]
         voted_for = web.form("voted_for").voted_for
-        tx.db.insert("votes", gameid=game, round=r, player=voter, voted_for=voted_for)
-        raise web.SeeOther(f"/games/{game}/rounds/{r}/waitforvotes")
+        already_voted = who_has_voted(game, r)
+        if voter in already_voted:
+            # ignore vote
+            raise web.SeeOther(f"/games/{game}/rounds/{r}/waitforvotes")
+        else:
+            tx.db.insert(
+                "votes", gameid=game, round=r, player=voter, voted_for=voted_for
+            )
+            raise web.SeeOther(f"/games/{game}/rounds/{r}/waitforvotes")
 
     def get(self, game, r):
         p = tx.user.session["pid"]

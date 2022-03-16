@@ -1,20 +1,22 @@
-$def with (game, r)
+$def with (game, r, is_last_voter)
 
 <p>Waiting for everyone to vote on Round $:{r}...</p>
 
-<script defer>
-  function goToWinner() {
-    fetch('/games/$game/rounds/$r/did-everyone-vote', {
-    }).then(response => response.json())
-      .then(data => {
-        if (data.ready === true) {
-          console.log(data)
-          //window.location.assign('https://www.maxwelljoslyn.com')
-          window.location.assign('/games/$game/rounds/$r/winner')
-        }
-    }).catch((error) => {
-        console.error('goToWinner errored:', error)
-    })
-  }
-  setInterval(goToWinner, 1000)
-</script>
+$if is_last_voter:
+    <form method=post action=/games/$game/rounds/$r/winner><button>See Who Won</button></form>
+$else:
+    <script defer>
+      function goToWinner() {
+        fetch('/games/$game/rounds/$r/did-everyone-vote', {
+        }).then(response => response.json())
+          .then(data => {
+            if (data.ready === true) {
+              console.log(data)
+              window.location.assign('/games/$game/rounds/$r/winner')
+            }
+        }).catch((error) => {
+            console.error('goToWinner errored:', error)
+        })
+      }
+      setInterval(goToWinner, 1000)
+    </script>
