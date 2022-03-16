@@ -1,4 +1,4 @@
-$def with (r, rname, rprompt, landscape, challenge, other_entries)
+$def with (r, rname, rprompt, landscape, challenge, other_entries, previous_round_winning_entry)
 
 $ r = titlecase(r)
 $ pid = tx.user.session['pid']
@@ -21,7 +21,7 @@ $if str(r) != '1':
 
 $if str(r) != '1':
     <p>Continue your writing from last round's winner:</p>
-    <div>$:get_winning_entry(game, r)</div>
+    <div>$:previous_round_winning_entry</div>
 
 $ pid = tx.user.session['pid']
 $ game = tx.user.session['game']

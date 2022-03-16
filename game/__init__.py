@@ -511,7 +511,18 @@ class Round:
         landscape = get_landscape(game)
         challenge = get_challenge(game)
         oe = get_other_entries(game, r, tx.user.session["pid"])
-        return app.view.round(r, name, prompt, landscape, challenge, oe)
+        if int(r) == 1:
+            return app.view.round(r, name, prompt, landscape, challenge, oe, None)
+        else:
+            return app.view.round(
+                r,
+                name,
+                prompt,
+                landscape,
+                challenge,
+                oe,
+                get_winning_entry(game, int(r) - 1),
+            )
 
 
 @app.control("games/{game}/rounds/{r}/advance")
