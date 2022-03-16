@@ -560,7 +560,6 @@ class Entries:
 @app.control("games/{game}/rounds/{r}/entries/{p}/others")
 class OtherEntries:
     def get(self, game, r, p):
-        # todo handle htmx
         if not tx.request.headers.get("hx-request"):
             raise web.NotAuthorized
         d = []
