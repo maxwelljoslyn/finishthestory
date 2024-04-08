@@ -2,9 +2,13 @@
 
 Finish the Story is a writing game that anyone can play. This collaborative, online learning experience will help you practice the craft of creative writing.
 
-## Play Online
+The game plays out over several rounds. In every round, each player responds to a prompt with a chunk of writing that could be incorporated into the ongoing story. After the round timer runs out, the players vote on whose writing should get added.
 
-[https://story.maxwelljoslyn.com](https://story.maxwelljoslyn.com) hosts an online demo of Finish the Story.
+## Screenshot
+
+This screenshot illustrates the voting mechanic.
+
+<img width="600vw" src="/game/static/screenshot.jpg">
 
 ## Install Your Own
 
@@ -21,4 +25,4 @@ If XXXX is not port 80, configure your reverse proxy to forward incoming request
 
 The original Finish the Story board game was developed by Achi Mishra, Chen Ji, Alison Crosby, Kendra Shu, Raghu Mina, and Keyu Lai.
 
-The web adaptation of the board game was implemented by Maxwell Joslyn.
+This (prototype) web adaptation of the board game was implemented by Maxwell Joslyn. It has all the functionality of the original, though the UI is still bare-bones.
